@@ -8,8 +8,8 @@ namespace IngameScript
     {
         Yield,
         Check,
-        Suspend,
-        Delay,
+        SleepTime,
+        SleepTicks,
         Await,
         Success,
     }

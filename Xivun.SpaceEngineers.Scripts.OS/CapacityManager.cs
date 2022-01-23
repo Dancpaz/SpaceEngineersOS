@@ -33,7 +33,7 @@ namespace IngameScript
             TicksPerUpdate = GetTicksPerUpdate();
         }
 
-        public bool HasCapacity(TimeSpan currentTime)
+        public bool HasCapacity()
         {
             return Runtime.CurrentInstructionCount <= MaxInstructionCount;
         }
@@ -51,22 +51,16 @@ namespace IngameScript
                 LongAverage.Next(TicksPerUpdate, Runtime.LastRunTimeMs));
 
             var pctCapacity = Math.Max(AverageMsMax - averageMs, 0) / AverageMsMax;
-            pctCapacity = Curve0(pctCapacity);
+            pctCapacity = Curve3(pctCapacity);
 
             return (int)(AbsoluteMaxInstructionCount * pctCapacity);
         }
 
         double Curve0(double pct) => pct;
-
-        double Curve1(double pct)
-        {
-            return Math.Sin(pct * Math.PI * 0.5);
-        }
-
-        double Curve2(double pct)
-        {
-            return Math.Pow(pct, 2.0);
-        }
+        double Curve1(double pct) => Math.Sin(pct * Math.PI * 0.5);
+        double Curve2(double pct) => Math.Pow(pct, 2.0);
+        double Curve3(double pct) => Math.Pow(pct, 0.5);
+        
 
         
 

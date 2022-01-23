@@ -67,12 +67,12 @@ namespace IngameScript
 
             Runtime.UpdateFrequency = UpdateFrequency.Update1;
 
-            TimeSpan resolutionTime = TimeSpanHelper.FromMilliseconds(250);
+            TimeSpan resolutionTime = TimeSpan.FromMilliseconds(250);
 
             var factory = new TaskSchedulerFactory();
             Scheduler = factory.Create(
                 this,
-                TimeSpanHelper.FromMilliseconds(0.5),
+                TimeSpan.FromMilliseconds(0.5),
                 0.75);
 
             MainTask = new MainTask(this);
@@ -106,7 +106,34 @@ namespace IngameScript
             // can be removed if not needed.
 
             Scheduler.Update();
-            WriteLine($"Last:  {Runtime.LastRunTimeMs:0.000}\r\nSAvg:  {Scheduler.Capacity.ShortAverageRuntimeMs:0.000}\r\nLAvg:  {Scheduler.Capacity.LongAverageRuntimeMs:0.000}\r\nInstr: {Runtime.CurrentInstructionCount}/{Runtime.MaxInstructionCount}");
+            WriteLine($"Ticks:  {Scheduler.CurrentTick}\r\nTasks: {Scheduler.TaskCount}\r\n{CountsString()}\r\nLast:  {Runtime.LastRunTimeMs:0.000}\r\nSAvg:  {Scheduler.Capacity.ShortAverageRuntimeMs:0.000}\r\nLAvg:  {Scheduler.Capacity.LongAverageRuntimeMs:0.000}\r\nInstr: {Runtime.CurrentInstructionCount}/{Runtime.MaxInstructionCount}");
+        }
+
+        string CountsString()
+        {
+            return string.Join("\r\n",
+                new[] { TaskPriorities.VeryHigh, TaskPriorities.High, TaskPriorities.Normal, TaskPriorities.Low, TaskPriorities.VeryLow }
+                .Select(CountString));
+        }
+
+        string CountString(TaskPriorities priority)
+        {
+            var counts = MainTask.PriorityStatistics[priority];
+            return $"{PriorityString(priority)}: Count {counts.TaskCount}  /  Run {counts.RunCount}";
+        }
+
+        string PriorityString(TaskPriorities priority)
+        {
+            return $"Priority {(int)priority}";
+            //switch(priority)
+            //{
+            //    case TaskPriorities.VeryHigh: return "VeryHigh";
+            //    case TaskPriorities.High: return "High";
+            //    case TaskPriorities.Normal: return "Normal";
+            //    case TaskPriorities.Low: return "Low";
+            //    case TaskPriorities.VeryLow: return "VeryLow";
+            //    default: throw new InvalidOperationException();
+            //}
         }
 
         void WriteLine(string text) => Echo(text);

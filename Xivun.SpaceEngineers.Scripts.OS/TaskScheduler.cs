@@ -10,22 +10,18 @@ namespace IngameScript
     {
         long LastOrdinal;
 
-        List<IScheduleTask> Suspended;
-        IQueue<IScheduleTask> Pending;
-        IQueue<IScheduleTask> Active;
+        TaskQueue Tasks;
         
         public CapacityManager Capacity { get; }
 
         public TimeSpan CurrentTime => DateTime.UtcNow - DateTime.MinValue;
         public int CurrentTick { get; private set; }
 
-        public int TaskCount => Pending.Count + Active.Count;
+        public int TaskCount => Tasks.Count;
 
         public TaskScheduler(Func<IComparer<IScheduleTask>, IQueue<IScheduleTask>> queueFactory, CapacityManager capacity)
         {
-            Suspended = new List<IScheduleTask>();
-            Pending = queueFactory(new ScheduleTaskTimeComparer());
-            Active = queueFactory(new ScheduleTaskActiveComparer());
+            Tasks = new TaskQueue(queueFactory);
             Capacity = capacity;
 
             LastOrdinal = 0;
@@ -33,11 +29,11 @@ namespace IngameScript
             UpdateTime();
         }
 
-        public bool HasCapacity() => Capacity.HasCapacity(CurrentTime);
+        public bool HasCapacity() => Capacity.HasCapacity();
 
         public IScheduleTask Schedule(ITaskDefinition definition, TimeSpan targetTime)
         {
-            return Schedule(definition.CreateTask(targetTime, this), null);
+            return Schedule(definition.CreateTask(targetTime, this), null, null);
         }
         public IScheduleTask Schedule<T>(TaskCreator<T> creator, TaskPriorities priority, TimeSpan targetTime)
         {
@@ -47,30 +43,37 @@ namespace IngameScript
                 Priority = priority
             }, targetTime);
         }
-        public IScheduleTask Schedule(IScheduleTask task, TimeSpan? targetElapsed)
+        public IScheduleTask Schedule(IScheduleTask task, TimeSpan? targetElapsed, long? targetTick)
         {
             if (task.Completed)
                 throw new InvalidOperationException();
 
-            task.TargetTime = targetElapsed ?? task.TargetTime;
-            task.PriorityOrdinal = ++LastOrdinal + (long)Math.Pow(2, LastOrdinal);
-
-            var queue = task.TargetTime <= Capacity.UpdateTime ? Active : Pending;
+            task.TargetTime = targetElapsed ?? task.TargetTime;     // for scheduling by time
+            task.TargetTick = targetTick ?? task.TargetTick;        // for scheduling by tick
+            task.PriorityOrdinal = CalculatePriorityOrdinal(task);  // for prioritization while active
 
             task.Running = true;
-            queue.Enqueue(task);
+            
+            Tasks.Enqueue(task);
+            
             return task;
+        }
+
+        long CalculatePriorityOrdinal(IScheduleTask task)
+        {
+            // Higher priority tasks should run more frequently, but all tasks should eventually run.
+            // In theory, this should roughly allow each priority level to run roughly twice as often
+            // as the priority level below it if there is contention for resources.
+            // In practice, the higher priority levels are getting much more time than expected.  This
+            // is not what I intended, but it is acceptable, so it is a lower priority fix.
+            return ++LastOrdinal + (long)(Math.Pow(2, (int)task.Priority)) * (Tasks.Count + 1);
         }
 
         public void Update()
         {
-            CurrentTick++;
-
-            UpdateSuspended();
-
             UpdateTime();
+            Tasks.Update(++CurrentTick, Capacity.UpdateTime);
 
-            UpdatePending();
             UpdateActive();
         }
 
@@ -88,10 +91,10 @@ namespace IngameScript
             ITaskYield result;
             while(true)
             {
-                // if no capacity, reschedule for next cycle @ same time/pos
+                // if no capacity, reschedule for next cycle @ same time/tick
                 if(!HasCapacity())
                 {
-                    Schedule(task, null);
+                    Schedule(task, null, null);
                     break;
                 }
 
@@ -124,18 +127,17 @@ namespace IngameScript
                         // performance check will occur on the next iteration
                         continue;
 
-                    case YieldCommands.Suspend:
-                        // will resume on the next update
-                        Suspended.Add(task);
-                        return;
-
                     case YieldCommands.Yield:
                         // back into pending, after all other tasks at same priority
-                        Schedule(task, Capacity.UpdateTime);
+                        Schedule(task, null, null);
                         return;
 
-                    case YieldCommands.Delay:
-                        Schedule(task, CurrentTime + (result.DelayTime ?? TimeSpan.Zero));
+                    case YieldCommands.SleepTicks:
+                        Schedule(task, null, CurrentTick + (result.DelayTicks ?? 0));
+                        return;
+
+                    case YieldCommands.SleepTime:
+                        Schedule(task, CurrentTime + (result.DelayTime ?? TimeSpan.Zero), null);
                         return;
 
                     case YieldCommands.Await:
@@ -183,25 +185,6 @@ namespace IngameScript
             }
         }
 
-        void UpdateSuspended()
-        {
-            var time = CurrentTime;
-
-            foreach (var task in Suspended)
-                Schedule(task, time);
-
-            Suspended.Clear();
-        }
-
-        /// <summary>
-        /// Moves pending items into the active queue once their scheduled time has arrived.
-        /// </summary>
-        void UpdatePending()
-        {
-            while (Pending.Count > 0 && Pending.Peek().TargetTime <= Capacity.UpdateTime)
-                Active.Enqueue(Pending.Dequeue());
-        }
-
         /// <summary>
         /// Processes items in the active queue so long as we have capacity this cycle.
         /// </summary>
@@ -209,20 +192,11 @@ namespace IngameScript
         {
             // process tasks in the main queue until we run out of capacity
             IScheduleTask task;
-            while (Capacity.HasCapacity(CurrentTime) && Active.Count > 0)
+            while (Capacity.HasCapacity() && Tasks.TryDequeue(out task))
             {
-                task = Active.Dequeue();
-
-                // TODO: capture and handle exceptions
                 DoRun(task);
             }
         }
-
-
-        //public TimeSpan ApplyResolution(TimeSpan input)
-        //{
-        //    return TimeSpanHelper.FromMilliseconds(Math.Ceiling(input.TotalMilliseconds / Resolution.TotalMilliseconds) * Resolution.TotalMilliseconds);
-        //}
 
         void UpdateTime()
         {

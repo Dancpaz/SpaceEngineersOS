@@ -33,7 +33,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)TaskState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TaskWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TaskYield.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TimeSpanHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)YieldCommands.cs" />
   </ItemGroup>
 </Project>

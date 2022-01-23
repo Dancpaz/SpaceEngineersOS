@@ -15,7 +15,7 @@ namespace IngameScript
             var shortAverage = new AverageCalculator(0.025);
             var longAverage = new AverageCalculator(0.01);
 
-            var capacity = new CapacityManager(program, shortAverage, longAverage, maxUpdateTime.TotalMilliseconds, 30000);
+            var capacity = new CapacityManager(program, shortAverage, longAverage, maxUpdateTime.TotalMilliseconds, 50000);
 
             var heapFactory = new PairingHeapFactory();
 

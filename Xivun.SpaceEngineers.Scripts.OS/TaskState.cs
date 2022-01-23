@@ -55,10 +55,16 @@ namespace IngameScript
             return task;
         }
 
-        public TaskYield<T> Delay(TimeSpan duration) => new TaskYield<T>
+        public TaskYield<T> Sleep(TimeSpan duration) => new TaskYield<T>
         {
-            Command = YieldCommands.Delay,
+            Command = YieldCommands.SleepTime,
             DelayTime = duration
+        };
+
+        public TaskYield<T> Sleep(long ticks = 1) => new TaskYield<T>
+        {
+            Command = YieldCommands.SleepTicks,
+            DelayTicks = ticks
         };
 
         public TaskYield<T> Yield() => new TaskYield<T>
@@ -69,11 +75,6 @@ namespace IngameScript
         public TaskYield<T> Check() => new TaskYield<T>
         {
             Command = YieldCommands.Check,
-        };
-
-        public TaskYield<T> Suspend() => new TaskYield<T>
-        {
-            Command = YieldCommands.Suspend,
         };
     }
 
