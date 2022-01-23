@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>61eba249-19f3-48b6-a25b-a4cee90168ba</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>IngameScript</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AverageCalculator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CapacityManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Containers\IPool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Containers\IQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Containers\ObjectPool.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Containers\PairingHeap.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Containers\PairingHeapFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IScheduleTask.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ITaskDefinition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ITaskState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ITaskYield.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScheduleTaskActiveComparer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScheduleTaskTickComparer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScheduleTaskTimeComparer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ScheduleTask.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TaskCreator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TaskDefinition.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TaskPriorities.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TaskQueue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TaskScheduler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TaskSchedulerFactory.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TaskState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TaskWrapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TaskYield.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TimeSpanHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)YieldCommands.cs" />
+  </ItemGroup>
+</Project>
