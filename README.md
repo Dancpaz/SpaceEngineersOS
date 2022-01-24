@@ -5,7 +5,7 @@ Instead of writing basic methods that run every time the Programmable Block is a
 * The scheduler thinks it can continue without going over the average tick ms limit
 * The task is not scheduled to run at a future time
 * The task is not scheduled to run on a future tick
-* There are tasks scheduled to run before it
+* There are not tasks scheduled to run before it
 
 If two tasks are scheduled for/at the same time, the task with higher priority will be scheduled to run first.  Higher priority tasks are scheduled to run more often than lower priority tasks, so while all tasks will be processed over time--nothing ever stops for long--higher priority tasks will get significantly more processing time.
 
