@@ -9,6 +9,11 @@ Instead of writing basic methods that run every time the Programmable Block is a
 
 If two tasks are scheduled for/at the same time, the task with higher priority will be scheduled to run first.  Higher priority tasks are scheduled to run more often than lower priority tasks, so while all tasks will be processed over time--nothing ever stops for long--higher priority tasks will get significantly more processing time.
 
+
+## Status
+The OS/Scheduler is unfinished.  It works, but the edges are very rough.  Its ability to measure performance requires refinement, and it currently shows a little too much favor to higher priority tasks.  The code could use some cleanup, and in an effort to adapt to the character limit for Space Engineers programmable blocks, I did not follow normal conventions.  Things that would ordinarily be properties are fields--yet still named like properties.  Things that should be read-only are writeable.  The minifier in MDK can do quite a bit, but keywords and library type names remain unaltered, so many of them are intentionally left out.
+
+
 ## Requirements
 * [Visual Studio 2019](https://visualstudio.microsoft.com/vs/older-downloads/) is required to work with this script.  It will not work properly with any other editor, including newer versions of Visual Studio.  If and when [MDK](https://github.com/malware-dev/MDK-SE) is updated to support newer versions, that will change.
 
@@ -22,8 +27,84 @@ This fantastic Visual Studio extension allows you to do several things:
 You can find an installer for [MDK](https://github.com/malware-dev/MDK-SE) on its Github page under releases.
 
 
-## Status
-The OS/Scheduler is unfinished.  It works, but the edges are very rough.  Its ability to measure performance requires refinement, and it currently shows a little too much favor to higher priority tasks.  The code could use some cleanup, and in an effort to adapt to the character limit for Space Engineers programmable blocks, I did not follow normal conventions.  Things that would ordinarily be properties are fields--yet still named like properties.  Things that should be read-only are writeable.  The minifier in MDK can do quite a bit, but keywords and library type names remain unaltered, so many of them are intentionally left out.
+## Usage
+Check the example project for usage examples.
+
+A bare minimum `Program` constructor looks like this:
+```cs
+public Program()
+{
+    // You must use Update1, Update10, or Update100
+    Runtime.UpdateFrequency = UpdateFrequency.Update1;
+
+    var factory = new TaskSchedulerFactory();
+    Scheduler = factory.Create(
+        this,                                   // reference to your program
+        TimeSpan.FromMilliseconds(0.5));        // max average tick limit        
+
+    // Schedule your main task / loop
+    Scheduler.Schedule<int>(MyMainTask, TaskPriorities.Normal, TimeSpan.Zero);            
+}
+```
+
+A bare minimum main `Main` method looks like this:
+```cs
+public void Main(string argument, UpdateType updateSource)
+{
+    Scheduler.Update();
+}
+```
+
+A very basic main task / loop might look like this:
+```cs
+public IEnumerable<TaskYield<int>> MyMainTask(TaskState<int> state)
+{
+    // perform any init for your task
+    bool quit = false;
+
+    // main loop
+    while (!quit)
+    {
+        // do stuff
+        YourDoStuffMethod();
+
+        // let other things run
+        yield return state.Yield();
+
+        // start a new task that takes a string and returns an integer, to run in the background
+        var task = state.Run<string, int>(AnotherTask, "Argument");
+
+        // do a lot of stuff
+        foreach (var item in items)
+        {
+            YourProcessItemMethod(item);
+
+            // let other things run in between each item
+            yield return state.Yield();
+        }
+
+        // wait for your background task to finish
+        yield return state.Await(task);
+
+        // do something with its result
+        YourProcessIntResultMethod(task.Result);
+
+        // run another task without a reference, and wait for it to complete
+        yield return state.Await<string>(YetAnotherTask);
+
+        // do something with its result 
+        YourProcessStringResultMethod((string)state.AwaitedResult);
+
+        // sleep until the next tick so you are not burning up CPU
+        yield return state.Sleep();
+    }
+
+    // return success with result value 0
+    yield return state.Success(0);
+}
+```
+
+Note that `state.Run` and `state.Await` both require you to provide type arguments for the task's result type and, where applicable, its argument.  The compiler is unfortunately not smart enough to figure these out for itself.
 
 
 ## Details
