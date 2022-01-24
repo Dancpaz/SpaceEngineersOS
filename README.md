@@ -27,9 +27,7 @@ This fantastic Visual Studio extension allows you to do several things:
 You can find an installer for [MDK](https://github.com/malware-dev/MDK-SE) on its Github page under releases.
 
 
-## Usage
-Check the example project for usage examples.
-
+## Examples
 A bare minimum `Program` constructor looks like this:
 ```cs
 public Program()
@@ -105,6 +103,8 @@ public IEnumerable<TaskYield<int>> MyMainTask(TaskState<int> state)
 ```
 
 Note that `state.Run` and `state.Await` both require you to provide type arguments for the task's result type and, where applicable, its argument.  The compiler is unfortunately not smart enough to figure these out for itself.
+
+There is a functional example script in the solution.
 
 
 ## Details
