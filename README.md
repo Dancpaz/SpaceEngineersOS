@@ -10,14 +10,14 @@ Instead of writing basic methods that run every time the Programmable Block is a
 If two tasks are scheduled for/at the same time, the task with higher priority will be scheduled to run first.  Higher priority tasks are scheduled to run more often than lower priority tasks, so while all tasks will be processed over time--nothing ever stops for long--higher priority tasks will get significantly more processing time.
 
 ## Requirements
-[Visual Studio 2019](https://visualstudio.microsoft.com/vs/older-downloads/) is required to work with this script.  It will not work properly with any other editor, including newer versions of Visual Studio.  If and when [MDK](https://github.com/malware-dev/MDK-SE) is updated to support newer versions, that will change.
+* [Visual Studio 2019](https://visualstudio.microsoft.com/vs/older-downloads/) is required to work with this script.  It will not work properly with any other editor, including newer versions of Visual Studio.  If and when [MDK](https://github.com/malware-dev/MDK-SE) is updated to support newer versions, that will change.
 
-[MDK](https://github.com/malware-dev/MDK-SE) is required to work with this script.
+* [MDK](https://github.com/malware-dev/MDK-SE) is required to work with this script.
 This fantastic Visual Studio extension allows you to do several things:
-* Maintain your code in separate files and/or projects
-* Publish your script as a single file directly to your Space Engineers script folder
-* Eliminate any type information your script is not actively using from the published script
-* Minify your code so you can fit more functionality into the 100,000 character Space Engineers allows for Programmable Blocks
+  * Maintain your code in separate files and/or projects
+  * Publish your script as a single file directly to your Space Engineers script folder
+  * Eliminate any type information your script is not actively using from the published script
+  * Minify your code so you can fit more functionality into the 100,000 character Space Engineers allows for Programmable Blocks
 
 You can find an installer for [MDK](https://github.com/malware-dev/MDK-SE) on its Github page under releases.
 
