@@ -38,6 +38,12 @@ namespace IngameScript
 
         void Log(string text) => Program.Echo(text);
 
+
+        void Something<T1, T2>(Func<T1, T2, IEnumerable<TaskYield<T2>>> creator)
+        {
+
+        }
+
         public IEnumerable<TaskYield<object>> Run(TaskState<object> state)
         {
             Action<string> log = text => Log($"MainTask:  {text}");
@@ -101,7 +107,6 @@ namespace IngameScript
             foreach(var testTask in testTasks)
                 yield return state.Await(testTask);
         }
-
 
         IEnumerable<TaskYield<object>> TestLoopTask(TaskState<object> state)
         {

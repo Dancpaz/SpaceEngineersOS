@@ -119,21 +119,12 @@ namespace IngameScript
         string CountString(TaskPriorities priority)
         {
             var counts = MainTask.PriorityStatistics[priority];
-            return $"{PriorityString(priority)}: Count {counts.TaskCount}  /  Run {counts.RunCount}";
+            return $"{PriorityString(priority)}: Qty {counts.TaskCount}  /  Run {counts.RunCount}";
         }
 
         string PriorityString(TaskPriorities priority)
         {
             return $"Priority {(int)priority}";
-            //switch(priority)
-            //{
-            //    case TaskPriorities.VeryHigh: return "VeryHigh";
-            //    case TaskPriorities.High: return "High";
-            //    case TaskPriorities.Normal: return "Normal";
-            //    case TaskPriorities.Low: return "Low";
-            //    case TaskPriorities.VeryLow: return "VeryLow";
-            //    default: throw new InvalidOperationException();
-            //}
         }
 
         void WriteLine(string text) => Echo(text);

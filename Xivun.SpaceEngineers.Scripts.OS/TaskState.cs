@@ -34,6 +34,17 @@ namespace IngameScript
             }
         };
 
+        public TaskYield<T> Await<TArg, TResult>(TaskCreator<TArg, TResult> creator, TArg arg, TaskPriorities? priority = null) => new TaskYield<T>
+        {
+            Command = YieldCommands.Await,
+            Await = new TaskDefinition<TArg, TResult>
+            {
+                Creator = creator,
+                Arg = arg,
+                Priority = priority ?? Priority
+            }
+        };
+
         public TaskYield<T> Await(IScheduleTask task) => new TaskYield<T>
         {
             Command = YieldCommands.Await,
@@ -49,6 +60,22 @@ namespace IngameScript
             };
 
             var task = (ScheduleTask<T2>)definition.CreateTask(Scheduler.CurrentTime, Scheduler);
+
+            Scheduler.Run(task);
+
+            return task;
+        }
+
+        public ScheduleTask<TResult> Run<TArg, TResult>(TaskCreator<TArg, TResult> method, TArg arg, TaskPriorities? priority = null)
+        {
+            var definition = new TaskDefinition<TArg, TResult>
+            {
+                Creator = method,
+                Arg = arg,
+                Priority = priority ?? Priority
+            };
+
+            var task = (ScheduleTask<TResult>)definition.CreateTask(Scheduler.CurrentTime, Scheduler);
 
             Scheduler.Run(task);
 
