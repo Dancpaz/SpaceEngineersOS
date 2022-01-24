@@ -9,10 +9,24 @@ Instead of writing basic methods that run every time the Programmable Block is a
 
 If two tasks are scheduled for/at the same time, the task with higher priority will be scheduled to run first.  Higher priority tasks are scheduled to run more often than lower priority tasks, so while all tasks will be processed over time--nothing ever stops for long--higher priority tasks will get significantly more processing time.
 
-# Status
+## Requirements
+[Visual Studio 2019](https://visualstudio.microsoft.com/vs/older-downloads/) is required to work with this script.  It will not work properly with any other editor, including newer versions of Visual Studio.  If and when [MDK](https://github.com/malware-dev/MDK-SE) is updated to support newer versions, that will change.
+
+[MDK](https://github.com/malware-dev/MDK-SE) is required to work with this script.
+This fantastic Visual Studio extension allows you to do several things:
+* Maintain your code in separate files and/or projects
+* Publish your script as a single file directly to your Space Engineers script folder
+* Eliminate any type information your script is not actively using from the published script
+* Minify your code so you can fit more functionality into the 100,000 character Space Engineers allows for Programmable Blocks
+
+You can find an installer for [MDK](https://github.com/malware-dev/MDK-SE) on its Github page under releases.
+
+
+## Status
 The OS/Scheduler is unfinished.  It works, but the edges are very rough.  Its ability to measure performance requires refinement, and it currently shows a little too much favor to higher priority tasks.  The code could use some cleanup, and in an effort to adapt to the character limit for Space Engineers programmable blocks, I did not follow normal conventions.  Things that would ordinarily be properties are fields--yet still named like properties.  Things that should be read-only are writeable.  The minifier in MDK can do quite a bit, but keywords and library type names remain unaltered, so many of them are intentionally left out.
 
-# Details
+
+## Details
 The scheduler allows you to run any number of tasks consecutively, limited only by performance.  It will run what it can, when it can, within the average tick time you provide for it.
 
 The scheduler currently supports:
@@ -36,7 +50,8 @@ The scheduler currently supports:
   - After awaiting a task, its result will be stored in `state.result`
   - If you have a reference to a completed task, you can access its result in `task.result`
 
-# Behind the Scenes
+
+## Behind the Scenes
 The scheduler uses three pairing heaps to keep track of most tasks.  Pairing heaps have relatively good performance compared to many other heaps, including binary heaps.  Their greatest pitfall is allocation; however, this particular pairing heap has been written to make use of an object pool to prevent excessive allocation and GC headaches.  All three pairing heaps share a single object pool.
 * `Active` - The `Active` pairing heap stores tasks that are active and ready to run, sorted by `PriorityOrdinal`.
   - `PriorityOrdinal` is based on a combination of the tick on which the task was scheduled and the task's priority.  Higher priority tasks will have a PriorityOrdinal closer to the tick in which they were scheduled.  The end result is that all tasks will be run regularly regardless of priority, but higher priority tasks will be run more often.  The goal was that each priority level should roughly double the number of executions allowed to a task relative to lower priority tasks.  That part still needs work.  The scheduler currently places a little too much emphasis on higher priority tasks, but the general idea that everything runs still holds true.
